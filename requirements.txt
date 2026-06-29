@@ -1,0 +1,10 @@
+flask
+langchain
+langchain-openai
+langchain-community
+faiss-cpu
+pypdf
+beautifulsoup4
+requests
+duckduckgo-search
+tiktoken
