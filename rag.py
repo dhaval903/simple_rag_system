@@ -1,11 +1,11 @@
 from langchain_openai import ChatOpenAI , OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from duckduckgo_search import DGS
+from duckduckgo_search import DDGS
 
-from config import openai_api_key
+from config import OPENAI_API_KEY
 
-embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
 db=FAISS.load_local(
     "vectorstore",
@@ -16,11 +16,11 @@ db=FAISS.load_local(
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0,
-    api_key=openai_api_key
+    api_key=OPENAI_API_KEY
 )
 
 def search_web(query):
-    results = DGS().text(query,max_results=5)
+    results = DDGS().text(query,max_results=5)
     
     text = ""
     
@@ -37,3 +37,37 @@ def ask_question(question):
     
     if docs and docs[0][1] > 0.5:
         context = "\n\n".join([doc[0].page_content for doc in docs])
+        
+        prompt = f"""
+            Answer Only from document,
+            
+            Document: {context}
+            
+            Question : {question}
+        """
+        
+        response = llm.invoke(prompt)
+        
+        return{
+            "source":"Document",
+            "answer":response.content
+        }
+        
+    web_content = search_web(question)
+    
+    prompt = f"""
+
+        Answer using web information.
+        
+        content: {web_content}
+        
+        Question:{question}
+    
+    """
+    
+    response= llm.invoke(prompt)
+    
+    return{
+        "source":"Web Search",
+        "answer":response.content
+    }

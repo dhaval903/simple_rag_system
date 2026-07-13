@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG Chat</title>
+
+    <style>
+
+    body{
+        font-family:Arial;
+        margin:40px;
+    }
+
+    #chat{
+        height:500px;
+        overflow:auto;
+        border:1px solid #ccc;
+        padding:10px;
+    }
+
+    .user{
+        color:blue;
+        margin-top:15px;
+    }
+
+    .bot{
+        color:green;
+        margin-bottom:15px;
+    }
+
+    </style>
+
+</head>
+<body>
+
+<h2>Document RAG Chatbot</h2>
+
+<div id="chat"></div>
+
+<br>
+
+<input
+type="text"
+id="msg"
+style="width:70%;"
+/>
+
+<button onclick="sendMessage()">
+Send
+</button>
+
+<script>
+
+async function sendMessage(){
+
+    let msg =
+    document.getElementById("msg").value;
+
+    document.getElementById("chat").innerHTML +=
+    `<div class='user'>
+        <b>User:</b> ${msg}
+    </div>`;
+
+    let response =
+    await fetch("/chat",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            message:msg
+        })
+    });
+
+    let data = await response.json();
+
+    document.getElementById("chat").innerHTML +=
+    `
+    <div class='bot'>
+        <b>Source:</b> ${data.source}<br><br>
+        <b>Answer:</b><br>
+        ${data.answer}
+    </div>
+    `;
+
+    document.getElementById("msg").value="";
+}
+
+</script>
+
+</body>
+</html>
